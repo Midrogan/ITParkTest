@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Movie;
+use App\Services\PosterService;
 use App\Http\Resources\MovieResource;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreMovieRequest;
@@ -10,6 +11,13 @@ use App\Http\Requests\UpdateMovieRequest;
 
 class MovieController extends Controller
 {
+    protected $posterService;
+
+    public function __construct(PosterService $posterService)
+    {
+        $this->posterService = $posterService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -30,9 +38,7 @@ class MovieController extends Controller
     {
         $fields = $request->validated();
 
-        if($request->hasFile('poster')) {
-            $fields['poster'] = $request->file('poster')->store('public');
-        }
+        $fields['poster'] = $this->posterService->addPoster($request);
 
         $movie = Movie::create($fields);
 
@@ -63,15 +69,7 @@ class MovieController extends Controller
     {
         $fields = $request->validated();
 
-        if ($request->hasFile('poster')) {
-
-            if(!$movie->poster == NULL)
-            {
-                Storage::delete($movie->poster);
-            }
-
-            $fields['poster'] = $request->file('poster')->store('public');
-        }
+        $fields['poster'] = $this->posterService->changePoster($request, $movie->poster_filename);
 
         $movie->update($fields);
 
@@ -103,10 +101,7 @@ class MovieController extends Controller
     {
         $movie->delete();
         
-        if(!$movie->poster == NULL)
-        {
-            Storage::delete($movie->poster);
-        }
+        $this->posterService->deletePosterIfExists($movie->poster_filename);
 
         return response()->json(NULL, 204);
     }

@@ -21,6 +21,7 @@ class MovieResource extends JsonResource
             'status' => $this->status,
             'poster' => $this->poster,
             'genres' => GenreResource::collection($this->genres),
+            // 'poster_filename' => $this->poster_filename,
         ];
     }
 }

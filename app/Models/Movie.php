@@ -17,6 +17,8 @@ class Movie extends Model
         'status',
     ];
 
+    protected $appends = 'poster_filename';
+
     /**
      * Get all of the genres for the Movie
      *
@@ -25,6 +27,11 @@ class Movie extends Model
     public function genres()
     {
         return $this->belongsToMany(Genre::class);
+    }
+
+    public function getPosterFilenameAttribute()
+    {
+        return $this->attributes['poster'];
     }
 
     public function getPosterAttribute()
